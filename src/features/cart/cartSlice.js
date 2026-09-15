@@ -52,9 +52,14 @@ const cartSlice = createSlice({
         state.cartItems = state.cartItems.filter(item => item.id !== id);
       }
     },
+    // ⬇️ New reducer: Checkout par cart clear karne ke liye
+    clearCart(state) {
+      state.cartItems = [];
+      state.totalQuantity = 0;
+    },
   },
 });
 
-// Ye teeno actions yahan se export ho rahe hain
-export const { addToCart, decreaseQuantity, removeFromCart } = cartSlice.actions;
+// ⬇️ clearCart ko bhi yahan export mein add kar diya hai
+export const { addToCart, decreaseQuantity, removeFromCart, clearCart } = cartSlice.actions;
 export default cartSlice.reducer;

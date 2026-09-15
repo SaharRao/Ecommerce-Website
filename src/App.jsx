@@ -4,7 +4,8 @@ import Navbar from './Components/Navbar';
 import Footer from './Components/Footer';
 import Home from './Pages/Home';
 import CartPage from './Pages/CartPage';
-import About from './Pages/About'; // Naya About component import kiya
+import About from './Pages/About'; 
+import Dashboard from './Pages/Dashboard';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/Dashboard" element={<Dashboard/>}/>
         </Routes>
       </main>
 

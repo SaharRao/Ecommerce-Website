@@ -1,14 +1,54 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { addToCart, decreaseQuantity, removeFromCart } from '../features/cart/cartSlice';
+import { Link, useNavigate } from 'react-router-dom';
+import { addToCart, decreaseQuantity, removeFromCart, clearCart } from '../features/cart/cartSlice';
+import { addOrder } from '../features/orders/ordersSlice';
 
 const CartPage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  
   const { cartItems, totalQuantity } = useSelector((state) => state.cart);
+  const [userName, setUserName] = useState('');
 
   // Grand Total calculation
   const grandTotal = cartItems.reduce((total, item) => total + item.totalPrice, 0);
+
+  // Handle Checkout / Place Order
+  const handleCheckout = (e) => {
+    e.preventDefault();
+
+    if (!userName.trim()) {
+      alert('Please enter your name');
+      return;
+    }
+
+    if (cartItems.length === 0) {
+      alert('Your cart is empty!');
+      return;
+    }
+
+    // New Order payload structure
+    const newOrder = {
+      id: `ORD-${Date.now().toString().slice(-4)}`,
+      userName: userName,
+      items: cartItems,
+      totalAmount: grandTotal,
+      date: new Date().toLocaleDateString(),
+      status: 'Pending',
+    };
+
+    // 1. Redux Store mein Order push karein
+    dispatch(addOrder(newOrder));
+
+    // 2. Cart Empty karein
+    dispatch(clearCart());
+
+    // 3. Reset form and redirect to dashboard
+    setUserName('');
+    alert('Order placed successfully!');
+    navigate('/dashboard');
+  };
 
   if (cartItems.length === 0) {
     return (
@@ -27,7 +67,7 @@ const CartPage = () => {
       <h2 className="mb-4">Shopping Cart ({totalQuantity} items)</h2>
 
       <div className="row g-4">
-        {/* Added Products List */}
+        {/* Cart Item Cards List */}
         <div className="col-lg-8">
           <div className="card border-0 shadow-sm p-3">
             {cartItems.map((item) => (
@@ -48,7 +88,7 @@ const CartPage = () => {
                   <p className="text-muted small mb-0">${item.price} each</p>
                 </div>
 
-                {/* Quantity Controls (+ / -) */}
+                {/* Quantity Controls */}
                 <div className="col-6 col-sm-3 d-flex align-items-center gap-2">
                   <button 
                     className="btn btn-sm btn-outline-secondary px-2"
@@ -65,7 +105,7 @@ const CartPage = () => {
                   </button>
                 </div>
 
-                {/* Item Total & Remove */}
+                {/* Total & Remove */}
                 <div className="col-6 col-sm-3 text-end">
                   <div className="fw-bold mb-1">${item.totalPrice.toFixed(2)}</div>
                   <button 
@@ -80,7 +120,7 @@ const CartPage = () => {
           </div>
         </div>
 
-        {/* Bill Summary */}
+        {/* Order Summary & Checkout Form */}
         <div className="col-lg-4">
           <div className="card border-0 shadow-sm p-4">
             <h5 className="mb-3">Order Summary</h5>
@@ -97,9 +137,23 @@ const CartPage = () => {
               <span>Total Bill</span>
               <span>${grandTotal.toFixed(2)}</span>
             </div>
-            <button className="btn btn-dark w-100 py-2 fw-semibold">
-              Checkout
-            </button>
+
+            <form onSubmit={handleCheckout}>
+              <div className="mb-3">
+                <label className="form-label fw-semibold">Customer Name</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Enter full name"
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
+                  required
+                />
+              </div>
+              <button type="submit" className="btn btn-dark w-100 py-2 fw-semibold">
+                Place Order
+              </button>
+            </form>
           </div>
         </div>
       </div>
